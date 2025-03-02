@@ -139,6 +139,7 @@ function GallbladderCancerDetection() {
 
       const data = await response.json();
       setPrediction(data);
+      console.log(data);
       if (data.attention_heatmap) {
         setAttentionHeatmapSrc(`data:image/png;base64,${data.attention_heatmap}`);
       }
