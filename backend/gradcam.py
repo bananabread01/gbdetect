@@ -4,10 +4,7 @@ import torch
 
 
 def generate_gradcam(model, input_tensor, target_class):
-    """
-    Generates a Grad-CAM heatmap for the given input_tensor and target_class.
-    Note: Adjust the target layer depending on your model's architecture.
-    """
+    
     gradients = {}
     activations = {}
 
@@ -17,7 +14,7 @@ def generate_gradcam(model, input_tensor, target_class):
     def save_gradient(module, grad_in, grad_out):
         gradients['value'] = grad_out[0]
 
-    # Identify the target layer. Adjust this based on your model's structure.
+    
     #target_layer = model.features[-1]
     target_layer = model.model.layer4
     # Register hooks
@@ -29,16 +26,14 @@ def generate_gradcam(model, input_tensor, target_class):
     probabilities_tensor = torch.nn.functional.softmax(output, dim=1)[0]
     predicted_class = torch.argmax(probabilities_tensor).item()
     score = probabilities_tensor[predicted_class]
-
-    # If your output is a vector of logits, select the logit corresponding to target_class.
+    # If output is a vector of logits
     ##if output.dim() == 2:
       #  score = output[0, target_class]
     #else:
      #   score = output[0]
-
     #score = output[0, 0]
 
-    # Backward pass: compute gradients with respect to the target score
+    # Backward pass. compute gradients to  target score
     model.zero_grad()
     score.backward(retain_graph=True)
 
@@ -50,7 +45,7 @@ def generate_gradcam(model, input_tensor, target_class):
     grads_val = gradients['value'][0].detach().cpu().numpy()    # shape: [channels, h, w]
     activations_val = activations['value'][0].detach().cpu().numpy()  # shape: [channels, h, w]
 
-    # Compute the weights: global average pooling over the gradients
+    # Compute weights: global average pooling over the gradients
     weights = np.mean(grads_val, axis=(1, 2))  # shape: [channels]
 
     # Compute the weighted combination of forward activation maps
@@ -58,7 +53,7 @@ def generate_gradcam(model, input_tensor, target_class):
     for i, w in enumerate(weights):
         cam += w * activations_val[i, :, :]
 
-    # Apply ReLU to the heatmap (only positive contributions)
+    # Apply ReLU to the heatmap: positive
     cam = np.maximum(cam, 0)
 
     # Normalize the heatmap to a range [0, 1]

@@ -1,17 +1,3 @@
-# # model.py (example)
-# import torch
-# import torch.nn as nn
-# import torchvision.models as models
-
-# class GallbladderCancerDetector(nn.Module):
-#     def __init__(self):
-#         super(GallbladderCancerDetector, self).__init__()
-#         self.model = models.resnet18(pretrained=True)  # Load ResNet18
-#         self.model.fc = nn.Linear(512, 3)  # Change output layer for 3 classes
-
-#     def forward(self, x):
-#         return self.model(x)
-
 import torch
 import torch.nn as nn
 import torchvision.models as models
@@ -26,9 +12,9 @@ class GatedAttentionMILPooling(nn.Module):
         self.tanh    = nn.Tanh()
 
     def forward(self, x):
-        # x: feature map of shape (B, C, H, W)
+        # feature map 
         B, C, H, W = x.shape
-        # Flatten spatial dimensions: shape (B, H*W, C)
+        # Flatten spatial dimensions of shape (B, H*W, C)
         x_flat = x.view(B, C, -1).permute(0, 2, 1)
         # calculate attention and gated features for each instance
         attn = self.sigmoid(self.attention_gate(x_flat))  # shape: (B, H*W, C)
@@ -46,7 +32,6 @@ class GatedAttentionMILPooling(nn.Module):
 class MILModel(nn.Module):
     def __init__(self, num_classes=3):
         super(MILModel, self).__init__()
-        # load EfficientNet-B0
         base_model = models.efficientnet_b0(pretrained=True) # outputs 1280 channels.
         self.base = base_model.features  # convolutional feature extractor
         # freeze initial layers 
@@ -64,19 +49,14 @@ class MILModel(nn.Module):
         x = self.dropout(pooled)
         logits = self.classifier(x)
         return logits
-
+    
+    #Computes the attention scores from the attention gate of the MIL pooling
     def get_attention_map(self, x):
-        """
-        Compute an approximate attention map from the MIL module.
-        The method runs the base network and then computes the attention scores
-        from the attention gate of the MIL pooling. We then average over channels.
-        """
         self.eval()
         with torch.no_grad():
             features = self.base(x)  # (B, 1280, H, W)
             B, C, H, W = features.shape
             x_flat = features.view(B, C, -1).permute(0, 2, 1)  # (B, H*W, C)
-            # Compute attention scores (using same linear layer as MIL pooling)
             attn_scores = self.mil_pooling.sigmoid(self.mil_pooling.attention_gate(x_flat))  # (B, H*W, C)
             # Average attention over the channel dimension to get a 1-channel map:
             attn_map = attn_scores.mean(dim=2).view(B, H, W)
