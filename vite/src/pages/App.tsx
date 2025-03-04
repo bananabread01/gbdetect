@@ -212,7 +212,7 @@ const App = () => {
                     </FileUploader>
 
                     <Button disabled={files?.length < 1} onClick={handleUpload} className="mt-2">
-                        Predict
+                        Analyze
                     </Button>
                 </div>
             </div>
