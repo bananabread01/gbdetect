@@ -6,7 +6,7 @@ const Instructions = () => {
         <section className='flex flex-col items-center justify-center pt-40'>
             <h1 className='text-7xl font-bold tracking-tighter'>Instructions</h1>
 
-            <ol className="text-lg text-gray-700 space-y-4 mt-16 mb-12 text-left">
+            <ol className="text-lg space-y-4 mt-16 mb-12 text-left">
             <li>
                     Get your predictions by navigating to the <strong>Predict</strong> page. To use the application:
                 </li>

@@ -10,6 +10,8 @@ import LoadingPage from './Loading';
 import Home from './Home';
 import App from './App';
 import Instructions from './Instructions';
+import Results from './Results';
+import Upload from './Upload';
 
 const Router = () => {
     let router = createBrowserRouter(
@@ -18,6 +20,8 @@ const Router = () => {
                 <Route index element={<Home />} />
                 <Route path='app' element={<App />} />
                 <Route path='instructions' element={<Instructions />} />
+                <Route path='upload' element={<Upload />} />
+                <Route path='results' element={<Results />} />
             </Route>
         )
     )

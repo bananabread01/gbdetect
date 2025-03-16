@@ -122,3 +122,10 @@
     @apply bg-background text-foreground;
   }
 }
+
+html, body {
+  overflow-x: hidden; 
+  overflow-y: scroll;
+  width: 100vw; 
+  height: 100vh; 
+}
