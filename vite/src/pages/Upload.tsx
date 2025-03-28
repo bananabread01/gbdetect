@@ -62,10 +62,11 @@ const Upload = () => {
     };
 
     return (
+        //bg-gray-100 dark:bg-gray-900
         <section className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 p-6">
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg space-y-6">
                 <h1 className="text-3xl font-bold text-center text-gray-900 dark:text-white">
-                    Upload Ultrasound Image
+                    Upload Ultrasound Scan
                 </h1>
 
                 <FileUploader
@@ -78,7 +79,7 @@ const Upload = () => {
                         <div className="flex items-center justify-center flex-col pt-3 pb-4 w-full">
                             <Paperclip className="h-8 w-8 text-gray-500 dark:text-gray-400" />
                             <p className="text-sm text-gray-500 dark:text-gray-400">
-                                Click to upload or drag and drop
+                                Click here to upload or drag and drop
                             </p>
                         </div>
                     </FileInput>

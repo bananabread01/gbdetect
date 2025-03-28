@@ -24,7 +24,7 @@ export default function MainNav() {
             >
                 Home
             </a>
-            <a
+            {/* <a
                 href="/app"
                 className={cn(
                     "transition-colors hover:text-foreground/80",
@@ -32,6 +32,15 @@ export default function MainNav() {
                 )}
             >
                 App
+            </a> */}
+            <a
+                href="/upload"
+                className={cn(
+                    "transition-colors hover:text-foreground/80",
+                    location.pathname === "/upload" ? "text-foreground" : "text-foreground/60"
+                )}
+            >
+                Predict
             </a>
             <a
                 href="/instructions"
@@ -41,15 +50,6 @@ export default function MainNav() {
                 )}
             >
                 Instructions
-            </a>
-            <a
-                href="/upload"
-                className={cn(
-                    "transition-colors hover:text-foreground/80",
-                    location.pathname === "/upload" ? "text-foreground" : "text-foreground/60"
-                )}
-            >
-                Upload
             </a>
         </nav>
         </div>
