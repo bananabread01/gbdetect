@@ -10,6 +10,7 @@ const Results = () => {
     const [prediction, setPrediction] = useState<{ predicted_class: number; confidence: number } | null>(null);
     const [attentionHeatmapSrc, setAttentionHeatmapSrc] = useState<string | null>(null);
     const [gradcamHeatmapSrc, setGradcamHeatmapSrc] = useState<string | null>(null);
+    const [gradcamPlusHeatmapSrc, setGradcamPlusHeatmapSrc] = useState<string | null>(null);
     const [selectedHeatmap, setSelectedHeatmap] = useState<string | null>(null);
     const [zoomScale, setZoomScale] = useState<number>(1); // Zoom level (default 1x)
     const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -45,7 +46,51 @@ const Results = () => {
         if (location.state.prediction?.gradcam_heatmap) {
             setGradcamHeatmapSrc(`data:image/png;base64,${location.state.prediction.gradcam_heatmap}`);
         }
+
+        if (location.state.prediction?.gradcam2plus_heatmap) {
+            setGradcamPlusHeatmapSrc(`data:image/png;base64,${location.state.prediction.gradcam2plus_heatmap}`);
+        }
     }, [location, navigate]);
+
+    const getProtocolText = () => {
+        if (!prediction) return null;
+    
+        switch (prediction.predicted_class) {
+            case 0:
+                return (
+                    <>
+                        <p className="text-sm text-green-700 dark:text-green-300 font-medium">Suggested Actions:</p>
+                        <ul className="list-disc list-inside text-sm text-gray-800 dark:text-gray-200">
+                            <li>Routine reporting. No suspicious findings detected.</li>
+                            <li>Optionally note: "AI-assisted review: Normal scan."</li>
+                        </ul>
+                    </>
+                );
+            case 1:
+                return (
+                    <>
+                        <p className="text-sm text-yellow-700 dark:text-yellow-300 font-medium">Suggested Actions:</p>
+                        <ul className="list-disc list-inside text-sm text-gray-800 dark:text-gray-200">
+                            <li>Confirm lesion type (e.g., polyp, stone).</li>
+                            <li>Consider follow-up in 6–12 months depending on size and symptoms.</li>
+                        </ul>
+                    </>
+                );
+            case 2:
+                return (
+                    <>
+                        <p className="text-sm text-red-700 dark:text-red-300 font-medium">Suggested Actions:</p>
+                        <ul className="list-disc list-inside text-sm text-gray-800 dark:text-gray-200">
+                            <li>Conduct second read by a senior radiologist.</li>
+                            <li>Recommend CT or MRI for further evaluation.</li>
+                            <li>Alert referring physician for escalation.</li>
+                        </ul>
+                    </>
+                );
+            default:
+                return null;
+        }
+    };    
 
     // Zoom Controls
     const handleZoomIn = () => {
@@ -106,32 +151,49 @@ const Results = () => {
                         ) : (
                             <p className="text-gray-500">Processing...</p>
                         )}
+
+                        {/* Protocol Info Box */}
+                        {prediction && (
+                            <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600">
+                                <h2 className="text-md font-semibold text-gray-900 dark:text-white mb-1">Clinical Protocol</h2>
+                                {getProtocolText()}
+                            </div>
+                        )}
                     </div>
 
                     {/* Heatmap Toggle Buttons */}
-                    <div className="flex flex-col space-y-2 mt-4">
+                    <div className="flex flex-col space-y-2 mt-4 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600">
                         <h2 className="text-lg font-bold text-gray-900 dark:text-white text-center">Select Heatmap</h2>
                         <Button 
                             onClick={() => setSelectedHeatmap(attentionHeatmapSrc)} 
                             disabled={!attentionHeatmapSrc}
-                            className="w-full"
+                            className={`w-full ${selectedHeatmap === attentionHeatmapSrc ? "bg-slate-500 text-white hover:bg-slate-600" : ""}`}
                         >
-                            Display Attention Heatmap
+                            Attention Heatmap
                         </Button>
                         <Button 
                             onClick={() => setSelectedHeatmap(gradcamHeatmapSrc)} 
                             disabled={!gradcamHeatmapSrc}
-                            className="w-full"
+                            className={`w-full ${selectedHeatmap === gradcamHeatmapSrc ? "bg-slate-500 text-white hover:bg-slate-600" : ""}`}
                         >
-                            Display Grad-CAM Heatmap
+                            Grad-CAM Heatmap
                         </Button>
-                    </div>
+                        <Button 
+                            onClick={() => setSelectedHeatmap(gradcamPlusHeatmapSrc)} 
+                            disabled={!gradcamPlusHeatmapSrc}
+                            className={`w-full ${selectedHeatmap === gradcamPlusHeatmapSrc ? "bg-slate-500 text-white hover:bg-slate-600" : ""}`}
+                        >
+                            Grad-CAM++ Heatmap
+                        </Button>
 
-                    {/* Zoom Controls */}
-                    <div className="flex flex-col space-y-2 mt-4">
-                        <h2 className="text-lg font-bold text-gray-900 dark:text-white text-center">Zoom Controls</h2>
-                        <Button onClick={handleZoomIn} className="w-full">Zoom In</Button>
-                        <Button onClick={handleZoomOut} className="w-full">Zoom Out</Button>
+                        {/* Zoom Controls */}
+                        <div className="flex flex-col space-y-2 mt-4">
+                            <div className="flex justify-center space-x-2">
+                                <h2 className="text-lg font-bold text-gray-900 dark:text-white text-center">Zoom</h2>
+                                <Button onClick={handleZoomOut} className="w-1/4 py-1 text-sm">–</Button>
+                                <Button onClick={handleZoomIn} className="w-1/4 py-1 text-sm">+</Button>
+                            </div>
+                        </div>
                     </div>
 
                     {/* New Session Button */}
@@ -144,19 +206,20 @@ const Results = () => {
                 <div className="flex-1 flex flex-col">
                     <div className="flex-1 flex flex-row justify-center">
                         {/* Original Ultrasound Image */}
-                        <div className="flex-1 flex items-center bg-black border-r-1 border-gray-400">
+                        <div className="flex-1 flex items-center bg-black border-r border-gray-400">
                             {imagePreview && (
                                 <img 
                                     src={imagePreview} 
                                     alt="Uploaded Scan" 
                                     className="w-full h-auto object-contain"
+                                    // add max-h-full 
                                 />
                             )}
                         </div>
 
                         {/* Selected Heatmap */}
                         <div 
-                            className="flex-1 flex bg-black overflow-hidden relative cursor-grab active:cursor-grabbing"
+                            className="flex-1 flex bg-black overflow-hidden relative items-center cursor-grab active:cursor-grabbing"
                             onMouseDown={handleMouseDown}
                             onMouseMove={handleMouseMove}
                             onMouseUp={handleMouseUp}
@@ -169,9 +232,14 @@ const Results = () => {
                                     style={{ 
                                         transform: `scale(${zoomScale}) translate(${position.x}px, ${position.y}px)`, 
                                         transformOrigin: "center"
+                                        //aspectRatio: imageWidth && imageHeight ? `${imageWidth}/${imageHeight}` : "auto",
+                                        // width: "100%",
+                                        // height: "100%",
+                                        // objectFit: "contain"  
                                     }} 
-                                    className="max-w-full max-h-full object-contain transition-transform duration-300"
-                                />
+                                    className="w-full h-auto object-cover transition-transform duration-300"
+                                /> //max-w-full max-h-full object-contain transition-transform duration-300 
+                                   //thisss w-full h-full object-cover transition-transform duration-300
                             ) : (
                                 <p className="text-lg text-gray-500 text-center absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                                     Select a heatmap to display
@@ -181,9 +249,9 @@ const Results = () => {
 
                     </div>
 
-                    {/* Footer Box for Image Titles & Additional Info */}
+                    {/* Footer Box */}
                     <div className="w-full border-t-2 border-gray-400 bg-gray-200 dark:bg-gray-700 text-center py-3 flex justify-between">
-                        {/* Original Image Section */}
+                        {/* Original Image */}
                         <div className="w-1/4 text-center">
                             <h2 className="text-lg text-left ml-4 font-bold text-gray-900 dark:text-white">Original Image</h2>
                             <p className="text-md text-left ml-4 text-gray-600 dark:text-gray-300">{imageName}</p>
@@ -199,7 +267,16 @@ const Results = () => {
                         <div className="w-1/4 text-center border-gray-400">
                             <h2 className="text-lg text-left ml-4 font-bold text-gray-900 dark:text-white">Heatmap</h2>
                             <p className="text-md text-left ml-4 text-gray-600 dark:text-gray-300">
-                                {selectedHeatmap ? (selectedHeatmap === attentionHeatmapSrc ? "Attention Heatmap" : "Grad-CAM Heatmap") : "No Heatmap Selected"}
+                                {selectedHeatmap 
+                                    ? selectedHeatmap === attentionHeatmapSrc 
+                                        ? "Attention Heatmap" 
+                                        : selectedHeatmap === gradcamHeatmapSrc 
+                                            ? "Grad-CAM Heatmap" 
+                                            : selectedHeatmap === gradcamPlusHeatmapSrc 
+                                                ? "Grad-CAM++ Heatmap" 
+                                                : "Heatmap"
+                                    : "No Heatmap Selected"
+                                }
                             </p>
                         </div>
 

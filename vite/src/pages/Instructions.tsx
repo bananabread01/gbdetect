@@ -1,40 +1,71 @@
 import { Link } from "react-router-dom";
-import { Button } from '@/components/ui/button'
+import { Button } from "@/components/ui/button";
 
 const Instructions = () => {
     return (
-        <section className='flex flex-col items-center justify-center pt-40'>
-            <h1 className='text-7xl font-bold tracking-tighter'>Instructions</h1>
+        <section className="flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 pt-40 px-6">
+            <h1 className="text-7xl font-bold tracking-tighter">Instructions</h1>
 
-            <ol className="text-lg space-y-4 mt-16 mb-12 text-left">
-            <li>
-                    Get your predictions by navigating to the <strong>Predict</strong> page. To use the application:
-                </li>
+            <ol className="text-lg space-y-6 mt-16 mb-12 text-left max-w-3xl">
                 <li>
-                    <strong>1. Upload an Ultrasound Image:</strong> Click on the "Analyze" button and select an ultrasound image of the gallbladder from your device.
+                    Begin by navigating to the <strong>Predict</strong> page.
                 </li>
+
                 <li>
-                    <strong>2. Analyze the Image:</strong> Once uploaded, the AI model will process the image and provide an analysis. This may take a few seconds.
+                    <strong>1. Upload an Ultrasound Image:</strong> Click the <em>"Analyze"</em> button and select an abdominal ultrasound image of the gallbladder from your device.
                 </li>
+
                 <li>
-                    <strong>3. View Results:</strong> The system will display whether the image indicates a <span className="font-semibold">normal</span>, <span className="text-yellow-600 font-semibold">benign</span>, or <span className="text-red-600 font-semibold">malignant</span> case.
+                    <strong>2. AI-Powered Analysis:</strong> The model will classify the image as:
+                    <ul className="list-disc list-inside ml-4">
+                        <li><span className="font-semibold">Normal</span></li>
+                        <li><span className="text-yellow-600 font-semibold">Benign Lesion</span> (e.g., gallstones, polyps)</li>
+                        <li><span className="text-red-600 font-semibold">Malignant Suspicion</span></li>
+                    </ul>
+                    It will also return a <strong>confidence score</strong> (in %).
                 </li>
+
                 <li>
-                    <strong>4. View the Explainability Feature:</strong> View highlighted regions of interest in the ultrasound image from the heatmaps displayed.
+                    <strong>3. Interpretability Support:</strong> Visual explanation tools help you understand the model's prediction:
+                    <ul className="list-disc list-inside ml-4">
+                        <li><strong>Attention Heatmap</strong>: Focus regions the model used to decide.</li>
+                        <li><strong>Grad-CAM</strong>: Gradient-based explanation.</li>
+                        <li><strong>Grad-CAM++</strong>: Highlights finer details and smaller regions.</li>
+                    </ul>
+                    Select each heatmap from the sidebar.
                 </li>
+
                 <li>
-                    <strong>5. Interpret the Results:</strong> Consult a radiologist to confirm the AI-generated results before making any clinical decisions.
+                    <strong>4. Clinical Protocol Box:</strong> Based on the model's prediction, a protocol will appear in the sidebar suggesting possible next steps.
+                    These suggestions are based on common clinical workflows and serve as decision support:
+                    <ul className="list-disc list-inside ml-4">
+                        <li><strong>Normal:</strong> Routine reporting.</li>
+                        <li><strong>Benign:</strong> Confirm lesion type, consider follow-up.</li>
+                        <li><strong>Malignant:</strong> Second read, recommend CT/MRI, escalate as needed.</li>
+                    </ul>
+                    Always apply your own clinical judgment.
+                </li>
+
+                <li>
+                    <strong>5. Zoom and Pan:</strong> Use zoom buttons to inspect heatmaps in detail. When zoomed in, click and drag to pan across the image.
+                </li>
+
+                <li>
+                    <strong>6. New Session:</strong> Use the <em>"New Session"</em> button to reset and upload a new scan.
+                </li>
+
+                <li className="text-gray-700 dark:text-gray-300">
+                    ⚠️ <strong>Disclaimer:</strong> This application is a diagnostic aid. It does not replace radiological expertise. All predictions should be interpreted in the full clinical context.
                 </li>
             </ol>
 
-            <div className='space-x-4 my-4'>
+            <div className="space-x-4 my-4">
                 <Button asChild>
-                    <Link to="/app">Predict</Link>
+                    <Link to="/upload">Predict</Link>
                 </Button>
             </div>
-
         </section>
-    )
-}
+    );
+};
 
-export default Instructions
+export default Instructions;
