@@ -28,15 +28,17 @@ jobs:
           context: ./backend
           push: true
           tags: registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web
-      
-      - name: Release
+
+      - name: Install Heroku CLI
+        run: curl https://cli-assets.heroku.com/install.sh | sh
+
+      - name: Add Heroku to PATH
+        run: echo "$HOME/bin" >> $GITHUB_PATH
+
+      - name: Release image to Heroku
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
-          curl -X PATCH https://api.heroku.com/apps/${{ secrets.HEROKU_APP_NAME }}/formation \
-            -H "Content-Type: application/json" \
-            -H "Accept: application/vnd.heroku+json; version=3.docker-releases" \
-            -H "Authorization: Bearer ${HEROKU_API_KEY}" \
-            -d '{"updates":[{"type":"web","docker_image":"$(curl -n -X GET https://api.heroku.com/apps/${{ secrets.HEROKU_APP_NAME }}/formation \
-                  -H "Accept: application/vnd.heroku+json; version=3" \
-                  -H "Authorization: Bearer ${HEROKU_API_KEY}" | jq ".[0].id")"}]}' 
+          echo "$HEROKU_API_KEY" | heroku auth:login --interactive
+          heroku container:login
+          heroku container:release web --app ${{ secrets.HEROKU_APP_NAME }}
