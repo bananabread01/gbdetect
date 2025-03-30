@@ -85,6 +85,11 @@ def encode_heatmap(heatmap):
     _, buffer = cv2.imencode(".png", heatmap)
     return base64.b64encode(buffer).decode("utf-8")
 
+#test endpoint
+@app.route('/')
+def home():
+    return "Backend is running!"
+
 # api endpoint
 @app.route('/predict', methods=['POST'])
 def predict():
