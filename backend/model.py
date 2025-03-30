@@ -1,67 +1,130 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torchvision.models as models
 
-class GatedAttentionMILPooling(nn.Module):
-    def __init__(self, in_features):
-        super(GatedAttentionMILPooling, self).__init__()
-        # dense layers
-        self.attention_gate = nn.Linear(in_features, in_features)
-        self.feature_gate   = nn.Linear(in_features, in_features)
-        self.sigmoid = nn.Sigmoid()
-        self.tanh    = nn.Tanh()
-
-    def forward(self, x):
-        # feature map 
-        B, C, H, W = x.shape
-        # Flatten spatial dimensions of shape (B, H*W, C)
-        x_flat = x.view(B, C, -1).permute(0, 2, 1)
-        # calculate attention and gated features for each instance
-        attn = self.sigmoid(self.attention_gate(x_flat))  # shape: (B, H*W, C)
-        feat = self.tanh(self.feature_gate(x_flat))         # shape: (B, H*W, C)
-        weighted = attn * feat  # element-wise multiplication
-
-        # Expand dimension and max pooling for the instances (H*W)
-        # weighted: (B, H*W, C) -> (B, 1, H*W, C)
-        weighted = weighted.unsqueeze(1)
-        pooled, _ = weighted.max(dim=2)  # pooled: (B, 1, C)
-        pooled = pooled.squeeze(1)       # pooled: (B, C)
-        return pooled
-
-# full model
-class MILModel(nn.Module):
+class Attention(nn.Module):
     def __init__(self, num_classes=3):
-        super(MILModel, self).__init__()
-        base_model = models.efficientnet_b0(pretrained=True) # outputs 1280 channels.
-        self.base = base_model.features  # convolutional feature extractor
-        # freeze initial layers 
-        # for param in list(self.base.parameters())[:100]:
-        #     param.requires_grad = False
+      super(Attention, self).__init__()
+      self.L = 512  # Size of the fully-connected layer
+      self.D = 256  # Attention layer size
+      self.K = 1    # Number of attention heads
 
-        self.mil_pooling = GatedAttentionMILPooling(in_features=1280)
-        self.dropout = nn.Dropout(0.5)
-        self.classifier = nn.Linear(1280, num_classes)
+      resnet = models.resnet18(pretrained=True)
+
+      # if freeze_backbone:
+      #   for param in list(resnet.parameters())[:-2]:
+      #     param.requires_grad = False
+
+      self.feature_extractor = nn.Sequential(*list(resnet.children())[:-2])
+      self.pool = nn.AdaptiveAvgPool2d((30, 30))  
+
+      self.extra_conv_layers = nn.Sequential(
+          nn.Conv2d(512, 256, kernel_size=3, stride=1, padding=1), 
+          nn.ReLU(),
+          nn.Conv2d(256, 128, kernel_size=3, stride=1, padding=1),
+          nn.ReLU(),
+          nn.Conv2d(128, 64, kernel_size=3, stride=1, padding=1),
+          nn.ReLU()
+      )
+
+      self.feature_extractor_part2 = nn.Sequential(
+          nn.Linear(64 * 30 * 30, self.L),
+          nn.ReLU(),
+          nn.Dropout(0.5),
+          nn.Linear(self.L, self.L),
+          nn.ReLU(),
+          nn.Dropout(0.5),
+      )
+
+      self.attention = nn.Sequential(
+          nn.Linear(self.L, self.D),
+          nn.Tanh(),
+          nn.Linear(self.D, self.K)
+      )
+
+      self.classifier = nn.Linear(self.L * self.K, num_classes)
 
     def forward(self, x):
-        # x: (B, 3, 224, 224)
-        features = self.base(x)   # shape: (B, 1280, H, W)  H=W=7
-        pooled = self.mil_pooling(features)  # shape: (B, 1280)
-        x = self.dropout(pooled)
-        logits = self.classifier(x)
-        return logits
-    
-    #Computes the attention scores from the attention gate of the MIL pooling
-    def get_attention_map(self, x):
-        self.eval()
-        with torch.no_grad():
-            features = self.base(x)  # (B, 1280, H, W)
-            B, C, H, W = features.shape
-            x_flat = features.view(B, C, -1).permute(0, 2, 1)  # (B, H*W, C)
-            attn_scores = self.mil_pooling.sigmoid(self.mil_pooling.attention_gate(x_flat))  # (B, H*W, C)
-            # Average attention over the channel dimension to get a 1-channel map:
-            attn_map = attn_scores.mean(dim=2).view(B, H, W)
-        return attn_map
 
+      B, bag_size, C, H, W = x.shape
+      x = x.view(B * bag_size, C, H, W)
+      features = self.feature_extractor(x) 
+      features = self.pool(features)        
+      features = self.extra_conv_layers(features)
+      features = features.view(B * bag_size, -1)  
+      H_features = self.feature_extractor_part2(features)  
+      H_features = H_features.view(B, bag_size, -1) 
+      A = self.attention(H_features.view(B * bag_size, -1))  
+      A = A.view(B, bag_size, self.K).transpose(1, 2)   
+      temperature = 0.5  # Adjust 
+      A = F.softmax(A / temperature, dim=2)
+
+      M = torch.bmm(A, H_features) 
+      M = M.view(B, -1) 
+      logits = self.classifier(M)
+      probs = F.log_softmax(logits, dim=1).exp()
+      return logits, probs, A
+
+    def calculate_classification_error(self, X, Y):
+      logits, _, _ = self.forward(X)
+      preds = torch.argmax(logits, dim=1)
+      error = 1.0 - preds.eq(Y).cpu().float().mean().item()
+      return error, preds
+
+    def calculate_objective(self, X, Y):
+      logits, _, A = self.forward(X)
+      criterion = nn.CrossEntropyLoss()
+      loss = criterion(logits, Y)
+      return loss, A
+
+
+    # def get_attention_map(self, x):
+    #   self.eval()
+    #   with torch.no_grad():
+    #       if x.ndimension() == 5:
+    #         x = x.unsqueeze(0)  
+    #       elif x.ndimension() == 4:  
+    #         pass
+    #       else:
+    #         raise ValueError(f"Unexpected input shape in get_attention_map: {x.shape}")
+
+    #       print(f"Input shape after adjustment: {x.shape}")
+    #       bag_size, C, H, W = x.shape
+
+    #       features = self.feature_extractor(x) 
+    #       features = self.pool(features)     
+    #       features = self.extra_conv_layers(features)
+    #       features = features.view(bag_size, -1)  
+
+    #       H_features = self.feature_extractor_part2(features)  
+
+    #       A = self.attention(H_features)  
+    #       A = F.softmax(A, dim=0)  
+
+    #       att_map = A[:, 0].cpu().numpy()  
+    #       return att_map
+      
+    def get_attention_map(self, x):
+      self.eval()
+      with torch.no_grad():
+        if x.ndimension() == 5:
+            x = x[:, 0, :, :, :]  # Remove bag dim if needed
+
+        print(f"Input shape after adjustment: {x.shape}")  # [B, C, H, W]
+
+        features = self.feature_extractor(x)  # [B, C, H, W]
+
+        # Optional: apply pooling or extra conv layers
+        features = self.pool(features)  # [B, C, H', W']
+        features = self.extra_conv_layers(features)  # still [B, C, H', W']
+
+        # Reduce to attention weights per spatial location
+        # For example, sum over channels to create heatmap
+        att_map = features.sum(dim=1)  # [B, H', W']
+
+        att_map = att_map[0].cpu().numpy()  # Convert first image in batch
+        return att_map
 
 
 
