@@ -24,6 +24,26 @@ app = Flask(__name__)
 
 CORS(app, origins="*")
 
+# Configure CORS explicitly
+# CORS(app, resources={r"/*": {"origins": "*"}})
+
+# # Add CORS headers to all responses
+# @app.after_request
+# def add_cors_headers(response):
+#     response.headers['Access-Control-Allow-Origin'] = '*'
+#     response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+#     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+#     return response
+
+# # Handle OPTIONS requests explicitly
+# @app.route('/predict', methods=['OPTIONS'])
+# def handle_options():
+#     response = make_response()
+#     response.headers['Access-Control-Allow-Origin'] = '*'
+#     response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+#     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+#     return response
+
 ALLOWED_EXT = {'jpg', 'jpeg', 'png'}
 
 # Load the trained model
@@ -66,14 +86,28 @@ def encode_heatmap(heatmap):
     _, buffer = cv2.imencode(".png", heatmap)
     return base64.b64encode(buffer).decode("utf-8")
 
+# Simple test endpoint
+@app.route('/test', methods=['GET', 'OPTIONS'])
+def test():
+    if request.method == 'OPTIONS':
+        return handle_options()
+    return jsonify({'status': 'ok', 'message': 'API is working'})
+
 # api endpoint
 @app.route('/predict', methods=['POST'])
 def predict():
+    print("Received predict request")
+    print("Request headers:", request.headers)
+    print("Request method:", request.method)
+    print("Request files:", request.files)
+    
     if 'file' not in request.files:
+        print("No file in request")
         return jsonify({'error': 'No file uploaded'}), 400
 
     file = request.files['file']
     if not allowed_file(file.filename):
+        print(f"Invalid file format: {file.filename}")
         return jsonify({'error': 'Invalid file format. Only JPG, JPEG, and PNG are allowed.'}), 400
 
     image_tensor = preprocess_image(file)
@@ -112,4 +146,5 @@ def predict():
         
     })
 if __name__ == '__main__':
+    print("Starting Flask app with CORS enabled for all origins (*)")
     app.run(debug=True)
