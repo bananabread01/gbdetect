@@ -61,8 +61,9 @@ const Results = () => {
                     <>
                         <p className="text-sm text-green-700 dark:text-green-300 font-medium">Suggested Actions:</p>
                         <ul className="list-disc list-inside text-sm text-gray-800 dark:text-gray-200">
-                            <li>Routine reporting. No suspicious findings detected.</li>
-                            <li>Optionally note: "AI-assisted review: Normal scan."</li>
+                            <li>The gallbladder appears normal. 
+                                No signs of structural abnormalities or suspicious regions were 
+                                detected by the system. Please correlate with clinical findings before concluding.</li>
                         </ul>
                     </>
                 );
@@ -72,7 +73,8 @@ const Results = () => {
                         <p className="text-sm text-yellow-700 dark:text-yellow-300 font-medium">Suggested Actions:</p>
                         <ul className="list-disc list-inside text-sm text-gray-800 dark:text-gray-200">
                             <li>Confirm lesion type (e.g., polyp, stone).</li>
-                            <li>Consider follow-up in 6–12 months depending on size and symptoms.</li>
+                            <li>The system detected features that are typically non-cancerous, but follow-up 
+                                imaging or clinical evaluation may be advised depending on symptoms</li>
                         </ul>
                     </>
                 );
@@ -81,9 +83,9 @@ const Results = () => {
                     <>
                         <p className="text-sm text-red-700 dark:text-red-300 font-medium">Suggested Actions:</p>
                         <ul className="list-disc list-inside text-sm text-gray-800 dark:text-gray-200">
-                            <li>Conduct second read by a senior radiologist.</li>
-                            <li>Recommend CT or MRI for further evaluation.</li>
-                            <li>Alert referring physician for escalation.</li>
+                            <li>The system detected features suggestive of malignancy. 
+                                This is not a definitive diagnosis. It is recommended to conduct a 
+                                second read by a senior radiologist, consider further evaluation with CT or MR.</li>
                         </ul>
                     </>
                 );
