@@ -1,4 +1,3 @@
-import os
 import torch
 import numpy as np
 import cv2
@@ -17,17 +16,17 @@ from heatmaps import visualize_attention, visualize_gradcam, visualize_gradcam_p
 
 app = Flask(__name__)
 # CORS to allow specific origins
-# CORS(app, origins=[
-#     "http://localhost:5173",  # Local development
-#     "https://bananabread01.github.io"  # GitHub Pages
-# ])
+CORS(app, origins=[
+    "http://localhost:5173",  # Local development
+    "https://bananabread01.github.io/gbdetect"  # GitHub Pages
+])
 
-CORS(app, origins="*")
+# CORS(app, origins="*")
 
 # Configure CORS explicitly
 # CORS(app, resources={r"/*": {"origins": "*"}})
 
-# # Add CORS headers to all responses
+# Add CORS headers to all responses
 # @app.after_request
 # def add_cors_headers(response):
 #     response.headers['Access-Control-Allow-Origin'] = '*'
@@ -86,13 +85,6 @@ def encode_heatmap(heatmap):
     _, buffer = cv2.imencode(".png", heatmap)
     return base64.b64encode(buffer).decode("utf-8")
 
-# Simple test endpoint
-@app.route('/test', methods=['GET', 'OPTIONS'])
-def test():
-    if request.method == 'OPTIONS':
-        return handle_options()
-    return jsonify({'status': 'ok', 'message': 'API is working'})
-
 # api endpoint
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -146,5 +138,4 @@ def predict():
         
     })
 if __name__ == '__main__':
-    print("Starting Flask app with CORS enabled for all origins (*)")
     app.run(debug=True)
