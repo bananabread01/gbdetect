@@ -3,6 +3,7 @@ import { useRef, useEffect, useState } from "react";
 import { Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FileUploader, FileUploaderContent, FileUploaderItem, FileInput } from "@/components/ui/fileinput";
+import { uploadImage } from "@/lib/api";
 
 const ImagePreview = ({ title, src }) => (
     <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg shadow-md">
@@ -53,20 +54,9 @@ const App = () => {
         }
 
         setError(null);
-        const formData = new FormData();
-        formData.append("file", files[0]);
 
         try {
-            const response = await fetch("http://127.0.0.1:5000/predict", {
-                method: "POST",
-                body: formData,
-            });
-
-            if (!response.ok) {
-                throw new Error("Server error");
-            }
-
-            const data = await response.json();
+            const data = await uploadImage(files[0]);
             console.log(data);
             setPrediction(data);
             if (data.attention_heatmap) {

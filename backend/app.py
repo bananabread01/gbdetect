@@ -16,7 +16,11 @@ from model import Attention
 from heatmaps import visualize_attention, visualize_gradcam, visualize_gradcam_plus
 
 app = Flask(__name__)
-CORS(app)
+# Update CORS to allow specific origins
+CORS(app, origins=[
+    "http://localhost:5173",  # Local development
+    "https://bananabread01.github.io/gbdetect"  # GitHub Pages (replace with your GitHub username)
+])
 
 ALLOWED_EXT = {'jpg', 'jpeg', 'png'}
 

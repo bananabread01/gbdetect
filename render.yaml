@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: gbdetect-api
+    env: python
+    region: ohio
+    buildCommand: cd backend && pip install -r requirements.txt
+    startCommand: cd backend && gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
+      - key: PATH_TO_MODEL
+        value: models/MILprototype3.pth 

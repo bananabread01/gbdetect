@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FileUploader, FileUploaderContent, FileUploaderItem, FileInput } from "@/components/ui/fileinput";
 import { Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { uploadImage } from "@/lib/api";
 
 const Upload = () => {
     const [files, setFiles] = useState<File[] | null>(null);
@@ -24,20 +25,8 @@ const Upload = () => {
         setLoading(true);
         setError(null);
 
-        const formData = new FormData();
-        formData.append("file", files[0]);
-
         try {
-            const response = await fetch("http://127.0.0.1:5000/predict", {
-                method: "POST",
-                body: formData,
-            });
-
-            if (!response.ok) {
-                throw new Error("Server error: Unable to process the image.");
-            }
-
-            const data = await response.json();
+            const data = await uploadImage(files[0]);
             console.log("Prediction Response:", data);
 
             // Navigate to Results page with the uploaded image and API response
