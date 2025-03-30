@@ -19,7 +19,7 @@ app = Flask(__name__)
 # CORS to allow specific origins
 CORS(app, origins=[
     "http://localhost:5173",  # Local development
-    "https://bananabread01.github.io/gbdetect"  # GitHub Pages
+    "https://bananabread01.github.io"  # GitHub Pages
 ])
 
 # CORS(app, origins="*")
@@ -97,7 +97,11 @@ def encode_heatmap(heatmap):
 #test endpoint
 @app.route('/')
 def home():
-    return "Backend is running!"
+    return "Yayay backend is running! :D"
+
+@app.route('/ping', methods=['GET'])
+def ping():
+    return jsonify({'message': 'pong'}), 200
 
 # api endpoint
 @app.route('/predict', methods=['POST'])
