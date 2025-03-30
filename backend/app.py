@@ -1,3 +1,4 @@
+import os
 import torch
 import numpy as np
 import cv2
@@ -48,8 +49,16 @@ ALLOWED_EXT = {'jpg', 'jpeg', 'png'}
 # Load the trained model
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model_path = "models/MILprototype3.pth"
+
+assert os.path.exists(model_path), f"Model file not found at {model_path}"
+print(f"File size of {model_path}:", os.path.getsize(model_path), "bytes")
+
 model = Attention(num_classes=3).to(device)
-model.load_state_dict(torch.load(model_path, map_location=device, weights_only=False), strict=False)
+try:
+    model.load_state_dict(torch.load(model_path, map_location=device, weights_only=False), strict=False)
+except Exception as e:
+    print(":( Model loading failed:", str(e))
+    raise
 model.eval()  
 
 transform = transforms.Compose([
