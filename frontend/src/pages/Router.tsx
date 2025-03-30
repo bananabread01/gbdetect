@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import {
     Route,
-    createBrowserRouter,
+    createHashRouter,
     createRoutesFromElements,
     RouterProvider
 } from 'react-router-dom';
@@ -14,7 +14,8 @@ import Results from './Results';
 import Upload from './Upload';
 
 const Router = () => {
-    let router = createBrowserRouter(
+    //for GitHub Pages compatibility
+    let router = createHashRouter(
         createRoutesFromElements(
             <Route path='/' element={<AppUI />} >
                 <Route index element={<Home />} />
