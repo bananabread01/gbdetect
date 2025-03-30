@@ -12,7 +12,7 @@ AI-powered Ultrasound Scan analysis for early Gallbladder Cancer detection.
 This project is set up for automated deployment using GitHub Actions:
 
 - Frontend is deployed to GitHub Pages
-- Backend is deployed to Render
+- Backend is deployed to Heroku
 
 ### Setup Instructions
 
@@ -20,24 +20,22 @@ This project is set up for automated deployment using GitHub Actions:
    - Push this code to a GitHub repository
    - Enable GitHub Pages in repository settings: Settings > Pages > Build and deployment > Source > GitHub Actions
 
-2. **Render Setup**:
-   - Create a new Web Service on [Render](https://render.com/)
-   - Connect your GitHub repository
-   - Select the "Backend" directory
-   - Set the environment to Python
-   - Add the following environment variables:
-     - `PYTHON_VERSION`: 3.10.0
-     - `PATH_TO_MODEL`: models/MILprototype3.pth
-   - Get your Render service ID and API key for GitHub secrets
+2. **Heroku Setup**:
+   - Create an account on [Heroku](https://www.heroku.com/)
+   - Install the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli)
+   - Run `heroku login` to authenticate
+   - Create a new app: `heroku create your-app-name`
+   - See detailed instructions in [HEROKU-SETUP.md](HEROKU-SETUP.md)
 
 3. **Update CORS Configuration**:
    - In `backend/app.py`, replace `"https://yourusername.github.io"` with your actual GitHub Pages URL (e.g., `"https://your-username.github.io/gbdetect"`)
 
 4. **GitHub Secrets**:
    - Add the following secrets to your GitHub repository:
-     - `RENDER_SERVICE_ID`: Your Render service ID
-     - `RENDER_API_KEY`: Your Render API key
-     - `BACKEND_URL`: Your Render backend URL (e.g., https://your-app.onrender.com)
+     - `HEROKU_API_KEY`: Your Heroku API key
+     - `HEROKU_APP_NAME`: Your Heroku app name
+     - `HEROKU_EMAIL`: Your Heroku account email
+     - `BACKEND_URL`: Your Heroku app URL (e.g., https://your-app-name.herokuapp.com)
 
 5. **Environment Variables**:
    - The GitHub Actions workflow will automatically create `.env.production` file during build
