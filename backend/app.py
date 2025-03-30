@@ -18,8 +18,8 @@ from heatmaps import visualize_attention, visualize_gradcam, visualize_gradcam_p
 app = Flask(__name__)
 # CORS to allow specific origins
 CORS(app, origins=[
-    "http://localhost:5173",  # Local 
-    "https://bananabread01.github.io/gbdetect"  # GitHub Pages 
+    "http://localhost:5173",  # Local development
+    "https://bananabread01.github.io"  # GitHub Pages
 ])
 
 ALLOWED_EXT = {'jpg', 'jpeg', 'png'}
