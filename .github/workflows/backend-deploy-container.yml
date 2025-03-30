@@ -39,6 +39,5 @@ jobs:
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
-          echo "$HEROKU_API_KEY" | heroku auth:login --interactive
           heroku container:login
           heroku container:release web --app ${{ secrets.HEROKU_APP_NAME }}
