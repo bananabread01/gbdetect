@@ -49,7 +49,7 @@ ALLOWED_EXT = {'jpg', 'jpeg', 'png'}
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model_path = "models/MILprototype3.pth"
 model = Attention(num_classes=3).to(device)
-model.load_state_dict(torch.load(model_path, map_location=device), strict=False)
+model.load_state_dict(torch.load(model_path, map_location=device, weights_only=False), strict=False)
 model.eval()  
 
 transform = transforms.Compose([
