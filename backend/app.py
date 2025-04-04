@@ -22,28 +22,6 @@ CORS(app, origins=[
     "https://bananabread01.github.io"  # GitHub Pages
 ])
 
-# CORS(app, origins="*")
-
-# Configure CORS explicitly
-# CORS(app, resources={r"/*": {"origins": "*"}})
-
-# Add CORS headers to all responses
-# @app.after_request
-# def add_cors_headers(response):
-#     response.headers['Access-Control-Allow-Origin'] = '*'
-#     response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-#     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-#     return response
-
-# # Handle OPTIONS requests explicitly
-# @app.route('/predict', methods=['OPTIONS'])
-# def handle_options():
-#     response = make_response()
-#     response.headers['Access-Control-Allow-Origin'] = '*'
-#     response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-#     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-#     return response
-
 ALLOWED_EXT = {'jpg', 'jpeg', 'png'}
 
 # Load the trained model
@@ -80,7 +58,7 @@ def generate_attention_heatmap(image_tensor):
     heatmap = visualize_attention(model, image_tensor)
     return heatmap
 
-# Function to generate Grad-CAM heatmap
+# Function to generate Grad-CAM heatmaps
 def generate_gradcam_heatmap(image_tensor, predicted_class):
     heatmap = visualize_gradcam(model, image_tensor, predicted_class)
     return heatmap

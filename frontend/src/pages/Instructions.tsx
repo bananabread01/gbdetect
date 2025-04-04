@@ -22,7 +22,7 @@ const Instructions = () => {
                         <li><span className="text-yellow-600 font-semibold">Benign Lesion</span> (e.g., gallstones, polyps)</li>
                         <li><span className="text-red-600 font-semibold">Malignant Suspicion</span></li>
                     </ul>
-                    It will also return a <strong>confidence score</strong> (in %).
+                    It will also return a <strong>confidence score</strong> (in %) to indicate the certainty of the prediction made.
                 </li>
 
                 <li>
@@ -32,6 +32,11 @@ const Instructions = () => {
                         <li><strong>Grad-CAM</strong>: Gradient-based explanation.</li>
                         <li><strong>Grad-CAM++</strong>: Highlights finer details and smaller regions.</li>
                     </ul>
+                    <li>
+                    The heatmaps uses color gradients to highlight different levels of importance. 
+                    Red areas, or "hot" area, indicate where attention is highest or regions of interest the model focused on, 
+                    while blue zones or "cool" regions are irrelevant to the model's decision.
+                    </li>
                     Select each heatmap from the sidebar.
                 </li>
 

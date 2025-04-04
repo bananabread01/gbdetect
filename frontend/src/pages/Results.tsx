@@ -60,33 +60,33 @@ const Results = () => {
                 return (
                     <>
                         <p className="text-sm text-green-700 dark:text-green-300 font-medium">Suggested Actions:</p>
-                        <ul className="list-disc list-inside text-sm text-gray-800 dark:text-gray-200">
-                            <li>The gallbladder appears normal. 
+                        <ol className="list-disc list-inside text-sm text-gray-800 dark:text-gray-200">
+                            <p>The gallbladder appears normal. 
                                 No signs of structural abnormalities or suspicious regions were 
-                                detected by the system. Please correlate with clinical findings before concluding.</li>
-                        </ul>
+                                detected by the system. Please correlate with clinical findings before concluding.</p>
+                        </ol>
                     </>
                 );
             case 1:
                 return (
                     <>
                         <p className="text-sm text-yellow-700 dark:text-yellow-300 font-medium">Suggested Actions:</p>
-                        <ul className="list-disc list-inside text-sm text-gray-800 dark:text-gray-200">
-                            <li>Confirm lesion type (e.g., polyp, stone).</li>
-                            <li>The system detected features that are typically non-cancerous, but follow-up 
-                                imaging or clinical evaluation may be advised depending on symptoms</li>
-                        </ul>
+                        <ol className="list-disc list-inside text-sm text-gray-800 dark:text-gray-200">
+                            <p>Confirm lesion type.</p>
+                            <p>The system detected features that are typically non-cancerous, but follow-up 
+                                imaging or clinical evaluation may be advised depending on symptoms.</p>
+                        </ol>
                     </>
                 );
             case 2:
                 return (
                     <>
                         <p className="text-sm text-red-700 dark:text-red-300 font-medium">Suggested Actions:</p>
-                        <ul className="list-disc list-inside text-sm text-gray-800 dark:text-gray-200">
-                            <li>The system detected features suggestive of malignancy. 
-                                This is not a definitive diagnosis. It is recommended to conduct a 
-                                second read by a senior radiologist, consider further evaluation with CT or MR.</li>
-                        </ul>
+                        <ol className="list-disc list-inside text-sm text-gray-800 dark:text-gray-200">
+                            <p>The system detected features suggestive of malignancy. 
+                                It is recommended to conduct a 
+                                second read by a senior radiologist, consider further evaluation with CT or MR.</p>
+                        </ol>
                     </>
                 );
             default:
@@ -94,16 +94,16 @@ const Results = () => {
         }
     };    
 
-    // Zoom Controls
+    // Zoom functionality
     const handleZoomIn = () => {
-        if (zoomScale < 3) setZoomScale(zoomScale + 0.2); // Limit max zoom to 3x
+        if (zoomScale < 3) setZoomScale(zoomScale + 0.2); 
     };
 
     const handleZoomOut = () => {
-        if (zoomScale > 1) setZoomScale(zoomScale - 0.2); // Prevent shrinking below original size
+        if (zoomScale > 1) setZoomScale(zoomScale - 0.2); 
     };
 
-    // Dragging (Panning) Functionality
+    // Dragging functionality
     const handleMouseDown = (e: React.MouseEvent) => {
         if (zoomScale > 1) {
             setIsDragging(true);
@@ -127,24 +127,25 @@ const Results = () => {
 
     return (
         <section className="min-h-screen flex flex-col bg-gray-100 dark:bg-gray-900 pt-14">
-            {/* Main Content (Sidebar + Images) */}
+            {/* Main Page */}
             <div className="flex flex-1">
-                {/* Sidebar (Left Column) */}
+                {/* Sidebar - Left Column */}
                 <div className="w-1/5 bg-white dark:bg-gray-800 p-6 shadow-lg flex flex-col justify-between border-r-1 border-gray-400">
                     {/* Prediction Results */}
                     <div className="text-center space-y-2">
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Prediction Results</h1>
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Results</h1>
                         {prediction ? (
                             <>
                                 <p className="text-lg">
-                                    Class:{" "}
+                                    Prediction:{" "}
                                     <span className="font-bold">
                                         {prediction.predicted_class === 0
-                                            ? "Normal"
+                                            ? "Normal "
                                             : prediction.predicted_class === 1
-                                            ? "Benign"
-                                            : "Malignant"}
+                                            ? "Benign "
+                                            : "Malignant "}
                                     </span>
+                                    Gallbladder
                                 </p>
                                 <p className="text-lg">
                                     Confidence: <span className="font-bold">{(prediction.confidence * 100).toFixed(2)}%</span>
@@ -204,7 +205,7 @@ const Results = () => {
                     </Button>
                 </div>
 
-                {/* Middle & Right Column - Images */}
+                {/* Images Column */}
                 <div className="flex-1 flex flex-col">
                     <div className="flex-1 flex flex-row justify-center">
                         {/* Original Ultrasound Image */}
@@ -213,13 +214,12 @@ const Results = () => {
                                 <img 
                                     src={imagePreview} 
                                     alt="Uploaded Scan" 
-                                    className="w-full h-auto object-contain"
-                                    // add max-h-full 
+                                    className="w-full h-auto object-contain" // add max-h-full 
                                 />
                             )}
                         </div>
 
-                        {/* Selected Heatmap */}
+                        {/* XAI Heatmap */}
                         <div 
                             className="flex-1 flex bg-black overflow-hidden relative items-center cursor-grab active:cursor-grabbing"
                             onMouseDown={handleMouseDown}
@@ -240,8 +240,7 @@ const Results = () => {
                                         // objectFit: "contain"  
                                     }} 
                                     className="w-full h-auto object-cover transition-transform duration-300"
-                                /> //max-w-full max-h-full object-contain transition-transform duration-300 
-                                   //thisss w-full h-full object-cover transition-transform duration-300
+                                /> //max-w-full max-h-full or h-full object-contain transition-transform duration-300 
                             ) : (
                                 <p className="text-lg text-gray-500 text-center absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                                     Select a heatmap to display
@@ -253,19 +252,19 @@ const Results = () => {
 
                     {/* Footer Box */}
                     <div className="w-full border-t-2 border-gray-400 bg-gray-200 dark:bg-gray-700 text-center py-3 flex justify-between">
-                        {/* Original Image */}
+                        {/* Original Image Name */}
                         <div className="w-1/4 text-center">
                             <h2 className="text-lg text-left ml-4 font-bold text-gray-900 dark:text-white">Original Image</h2>
                             <p className="text-md text-left ml-4 text-gray-600 dark:text-gray-300">{imageName}</p>
                         </div>
 
-                        {/* Date Section */}
+                        {/* Date */}
                         <div className="w-1/4 text-center border-r-2 border-gray-400">
                             <h2 className="text-lg text-right mr-4 font-bold text-gray-900 dark:text-white">Date</h2>
                             <p className="text-md text-right mr-4 text-gray-600 dark:text-gray-300">{new Date().toLocaleDateString()}</p>
                         </div>
 
-                        {/* Heatmap Section */}
+                        {/* Heatmap Selected Info */}
                         <div className="w-1/4 text-center border-gray-400">
                             <h2 className="text-lg text-left ml-4 font-bold text-gray-900 dark:text-white">Heatmap</h2>
                             <p className="text-md text-left ml-4 text-gray-600 dark:text-gray-300">
@@ -282,7 +281,7 @@ const Results = () => {
                             </p>
                         </div>
 
-                        {/* Image Size Section */}
+                        {/* Image Size Box */}
                         <div className="w-1/4 text-center">
                             <h2 className="text-lg text-right mr-4 font-bold text-gray-900 dark:text-white">Size</h2>
                             <p className="text-md text-right mr-4 text-gray-600 dark:text-gray-300">
