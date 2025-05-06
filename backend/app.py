@@ -119,8 +119,8 @@ def predict():
         confidence = probabilities[predicted_class]
         
     attention_heatmap = generate_attention_heatmap(image_tensor)
-    gradcam_heatmap = generate_gradcam_heatmap(image_tensor, predicted_class)
-    gradcam2plus_heatmap = generate_gradcam_plus_heatmap(image_tensor, predicted_class)
+    gradcam_heatmap = generate_gradcam_heatmap(image_tensor[0].unsqueeze(0), predicted_class)
+    gradcam2plus_heatmap = generate_gradcam_plus_heatmap(image_tensor[0].unsqueeze(0), predicted_class)
 
     attention_encoded = encode_heatmap(attention_heatmap)
     gradcam_encoded = encode_heatmap(gradcam_heatmap)
