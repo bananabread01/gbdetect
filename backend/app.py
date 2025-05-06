@@ -119,11 +119,11 @@ def predict():
         
     attention_heatmap = generate_attention_heatmap(image_tensor)
     gradcam_heatmap = generate_gradcam_heatmap(image_tensor, predicted_class)
-    gradcam2plus_heatmap = generate_gradcam_plus_heatmap(image_tensor, predicted_class)
+    # gradcam2plus_heatmap = generate_gradcam_plus_heatmap(image_tensor, predicted_class)
 
     attention_encoded = encode_heatmap(attention_heatmap)
     gradcam_encoded = encode_heatmap(gradcam_heatmap)
-    gradcam2plus_encoded = encode_heatmap(gradcam2plus_heatmap)
+    # gradcam2plus_encoded = encode_heatmap(gradcam2plus_heatmap)
 
     # JSON response
     return jsonify({
@@ -131,8 +131,8 @@ def predict():
         'probabilities': probabilities.tolist(),
         'confidence': float(confidence),
         'attention_heatmap': attention_encoded,
-        'gradcam_heatmap': gradcam_encoded,
-        'gradcam2plus_heatmap': gradcam2plus_encoded
+        'gradcam_heatmap': gradcam_encoded
+        # 'gradcam2plus_heatmap': gradcam2plus_encoded
         
     })
 if __name__ == '__main__':
