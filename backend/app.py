@@ -100,7 +100,7 @@ def predict():
 
     image_tensor = preprocess_image(file)
     image_tensor = image_tensor.unsqueeze(0)
-    image_tensor = image_tensor.repeat(10, 1, 1, 1) 
+    image_tensor = image_tensor.repeat(5, 1, 1, 1) 
     bag_tensor = image_tensor.unsqueeze(0).to(device)
 
     # Run inference
