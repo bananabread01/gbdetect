@@ -26,7 +26,7 @@ ALLOWED_EXT = {'jpg', 'jpeg', 'png'}
 
 # Load the trained model
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model_path = "models/MILprototype3.pth"
+model_path = "models/MILprototype5.pth"
 
 assert os.path.exists(model_path), f"Model file not found at {model_path}"
 print(f"File size of {model_path}:", os.path.getsize(model_path), "bytes")
@@ -99,7 +99,9 @@ def predict():
         return jsonify({'error': 'Invalid file format. Only JPG, JPEG, and PNG are allowed.'}), 400
 
     image_tensor = preprocess_image(file)
-    image_tensor = image_tensor.unsqueeze(0).to(device)
+    image_tensor = image_tensor.unsqueeze(0)
+    image_tensor = image_tensor.repeat(10, 1, 1, 1) 
+    bag_tensor = image_tensor.unsqueeze(0).to(device)
 
     # Run inference
     # with torch.no_grad():
@@ -110,11 +112,11 @@ def predict():
 
     model.eval()
     with torch.no_grad():
-        output, _, _ = model(image_tensor.unsqueeze(0).to(device))
+        output, _, _ = model(bag_tensor)
         probabilities = torch.softmax(output, dim=1).cpu().numpy()[0]
         predicted_class = np.argmax(probabilities)
         confidence = probabilities[predicted_class]
-
+        
     attention_heatmap = generate_attention_heatmap(image_tensor)
     gradcam_heatmap = generate_gradcam_heatmap(image_tensor, predicted_class)
     gradcam2plus_heatmap = generate_gradcam_plus_heatmap(image_tensor, predicted_class)

@@ -7,6 +7,7 @@ from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
 from pytorch_grad_cam.utils.image import show_cam_on_image
 from pytorch_grad_cam import GradCAMPlusPlus
+import torch.nn.functional as F
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 matplotlib.use('Agg')
@@ -14,60 +15,33 @@ matplotlib.use('Agg')
 def visualize_attention(model, image_tensor):
     model.eval()
 
-    if image_tensor.dim() == 4:
-        image_tensor = image_tensor[0] 
+    if image_tensor.dim() == 5:
+        image_tensor = image_tensor.squeeze(0)  
 
-    image_tensor = image_tensor.unsqueeze(0).to(device)
+    image_tensor = image_tensor.to(device)
+
     with torch.no_grad():
-        att_map = model.get_attention_map(image_tensor)  
+        print("Input to attention map:", image_tensor.shape)
+        att_map = model.get_attention_map(image_tensor) 
 
-    print("Raw attention output type:", type(att_map))
-    print("Raw attention output:", att_map)
+    print("Raw attention output shape:", np.shape(att_map))
 
-
-    att_map = torch.tensor(att_map, device=device)
-    print("Attention map shape:", att_map.shape)
-
-
-# If it's a list or 1D value
-    if att_map.ndim == 1 and att_map.shape[0] == 1:
-        raise ValueError("The attention map returned by the model has shape (1,). It might be invalid or scalar.")
-
-    # If it's 3D, average 
-    if att_map.ndim == 3:
-        att_map = att_map.mean(dim=0)
-
-    if att_map.ndim != 2:
-        raise ValueError(f"Expected attention map to be 2D after processing, but got shape {att_map.shape}")
-
-    att_map = att_map.cpu().numpy()
-
-    # att_map = att_map.mean(dim=0)  
-    # att_map = att_map.cpu().numpy()  
-
-    img_np = image_tensor.squeeze(0).permute(1, 2, 0).cpu().numpy() 
-    img_np = (img_np - img_np.min()) / (img_np.max() - img_np.min())
-    img_rgb = (img_np * 255).astype(np.uint8)
-
-    h, w, _ = img_rgb.shape  
-    # att_map_resized = cv2.resize(att_map, (w, h))
-
-    att_map_resized = cv2.resize(att_map, (w, h))
-    # att_map_resized = (img_np * 255).astype(np.uint8)
-
+    att_map_resized = cv2.resize(att_map, (224, 224))
     att_norm = (att_map_resized - att_map_resized.min()) / (att_map_resized.max() - att_map_resized.min())
 
-    threshold = 0.7
+    threshold = 0.4
     att_masked = np.where(att_norm >= threshold, att_norm, 0)
 
+    selected_img = image_tensor[0].cpu() 
+    selected_img_np = selected_img.permute(1, 2, 0).numpy()
+    selected_img_np = (selected_img_np - selected_img_np.min()) / (selected_img_np.max() - selected_img_np.min())
+    img_rgb = (selected_img_np * 255).astype(np.uint8)
 
     heatmap = cv2.normalize(att_masked, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
-    # heatmap = np.uint8(heatmap)
     heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
-
     superimposed_img = cv2.addWeighted(heatmap, 0.4, img_rgb, 0.6, 0)
 
-    return superimposed_img  
+    return superimposed_img
 
 
 def visualize_gradcam(model, image_tensor, target_class):
@@ -124,10 +98,9 @@ def visualize_gradcam(model, image_tensor, target_class):
         return
 
     img_np = vis_tensor[0].permute(1, 2, 0).cpu().numpy()
-    img_np = (img_np - img_np.min()) / (img_np.max() - img_np.min())  # Normalize to [0, 1]
+    img_np = (img_np - img_np.min()) / (img_np.max() - img_np.min())  # Normalize 
     img_rgb = (img_np * 255).astype(np.uint8)
 
-    # Resize CAM and apply heatmap
     heatmap = cv2.resize(grayscale_cam, (img_rgb.shape[1], img_rgb.shape[0]))
     heatmap = np.uint8(255 * heatmap)
     heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
