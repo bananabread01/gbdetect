@@ -1,4 +1,5 @@
 import os
+import gc
 import torch
 import numpy as np
 import cv2
@@ -126,7 +127,7 @@ def predict():
     gradcam2plus_encoded = encode_heatmap(gradcam2plus_heatmap)
 
     # JSON response
-    return jsonify({
+    response =  jsonify({
         'predicted_class': int(predicted_class),
         'probabilities': probabilities.tolist(),
         'confidence': float(confidence),
@@ -135,5 +136,13 @@ def predict():
         'gradcam2plus_heatmap': gradcam2plus_encoded
         
     })
+
+    del attention_heatmap, gradcam_heatmap, gradcam2plus_heatmap
+    del attention_encoded, gradcam_encoded, gradcam2plus_encoded
+    del image_tensor, bag_tensor, probabilities, output
+    gc.collect()
+
+    return response
+
 if __name__ == '__main__':
     app.run(debug=True)
