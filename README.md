@@ -10,40 +10,10 @@ AI-powered Ultrasound Scan analysis for early Gallbladder Cancer detection.
 ## Deployment with GitHub Actions
 
 This project is set up for automated deployment using GitHub Actions:
-
 - Frontend is deployed to GitHub Pages
 - Backend is deployed to Heroku
 
-### Setup Instructions
 
-1. **GitHub Repository Setup**:
-   - Push this code to a GitHub repository
-   - Enable GitHub Pages in repository settings: Settings > Pages > Build and deployment > Source > GitHub Actions
-
-2. **Heroku Setup**:
-   - Create an account on [Heroku](https://www.heroku.com/)
-   - Install the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli)
-   - Run `heroku login` to authenticate
-   - Create a new app: `heroku create your-app-name`
-   - See detailed instructions in [HEROKU-SETUP.md](HEROKU-SETUP.md)
-
-3. **Update CORS Configuration**:
-   - In `backend/app.py`, replace `"https://yourusername.github.io"` with your actual GitHub Pages URL (e.g., `"https://your-username.github.io/gbdetect"`)
-
-4. **GitHub Secrets**:
-   - Add the following secrets to your GitHub repository:
-     - `HEROKU_API_KEY`: Your Heroku API key
-     - `HEROKU_APP_NAME`: Your Heroku app name
-     - `HEROKU_EMAIL`: Your Heroku account email
-     - `BACKEND_URL`: Your Heroku app URL (e.g., https://your-app-name.herokuapp.com)
-
-5. **Environment Variables**:
-   - The GitHub Actions workflow will automatically create `.env.production` file during build
-   - For local development, copy `.env.example` to `.env.local` and update as needed
-
-6. **Deploy**:
-   - Push to main branch to trigger deployments
-   - Alternatively, manually trigger workflows from GitHub Actions tab
 
 ## Local Development
 
